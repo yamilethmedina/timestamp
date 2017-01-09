@@ -5,6 +5,7 @@ var routes = require('./app/routes/index.js');
 var mongoose = require('mongoose');
 var passport = require('passport');
 var session = require('express-session');
+var moment = require('moment');
 
 var app = express();
 require('dotenv').load();
@@ -28,7 +29,36 @@ app.use(passport.session());
 
 routes(app, passport);
 
-var port = process.env.PORT || 8080;
-app.listen(port,  function () {
+var port = 8080;
+app.listen(process.env.PORT || port,  function () {
 	console.log('Node.js listening on port ' + port + '...');
 });
+
+
+app.get('/', function (req, res) {
+	res.send('Timestamp API!')
+})
+
+app.get('/:timestamp', function (req, res) {
+	// res.json({unix: '', natural: ''})
+
+	var time = moment(req.params.timestamp, 'MMMM DD, YYYY')
+	if (!time.isValid()) {
+		time = moment.unix(req.params.timestamp)
+	}
+
+	if (!time.isValid()) {
+		
+			res.json({
+			"unix": null,
+			"natural": null
+		})
+	}
+	else {
+		res.json({
+			"unix": time.format('X'),
+			"natural": time.format('MMMM DD, YYYY')
+		})
+		}
+	})
+
